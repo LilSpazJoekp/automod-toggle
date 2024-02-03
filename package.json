@@ -1,0 +1,26 @@
+{
+  "private": true,
+  "name": "automod-toggle",
+  "version": "0.0.2.0",
+  "license": "BSD-3-Clause",
+  "type": "module",
+  "scripts": {
+    "bump-major": "./bump_version.py major && devvit upload --bump major",
+    "bump-minor": "./bump_version.py minor && devvit upload --bump minor",
+    "bump-patch": "./bump_version.py patch && devvit upload --bump patch",
+    "bump-prerelease": "./bump_version.py pre && devvit upload --bump prerelease"
+  },
+  "dependencies": {
+    "@devvit/dev-server": "^0.10.13",
+    "@devvit/public-api": "0.10.12",
+    "chrono-node": "2.3.9",
+    "cron-parser": "^4.9.0",
+    "devvit": "^0.10.12",
+    "lodash": "^4.17.21",
+    "parse-duration": "^1.1.0"
+  },
+  "devDependencies": {
+    "@types/lodash": "^4.14.202",
+    "typescript": "5.3.2"
+  }
+}
