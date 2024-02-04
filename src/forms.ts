@@ -7,9 +7,9 @@ export function addRuleFormGenerator(_: Data): Form {
         acceptLabel: "Add",
         fields: [
             {
-                defaultValue: "test",
                 label: "Rule Name",
                 name: "name",
+                placeholder: "Rule Name",
                 required: true,
                 type: "string",
             },
@@ -22,7 +22,6 @@ export function addRuleFormGenerator(_: Data): Form {
                 type: "string",
             },
             {
-                defaultValue: "30 seconds",
                 label: "Duration. Can be human readable or in seconds.",
                 name: "duration",
                 placeholder: "1 day",

@@ -12,7 +12,10 @@ package_json_file = Path("package.json")
 @click.command()
 @click.argument("bump_type", type=click.Choice(["major", "minor", "patch", "pre"]))
 def main(bump_type):
-    major, minor, patch, pre = get_version()
+    try:
+        major, minor, patch, pre = get_version()
+    except ValueError:
+        major, minor, patch, pre = *get_version(), 0
 
     match bump_type:
         case "major":
