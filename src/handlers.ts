@@ -197,8 +197,21 @@ export async function onFormSubmitAddRuleHandler(event: FormOnSubmitEvent, conte
     content = `${content.trim()}\n---\n${newRule.trim()}`;
 
     // Update the wiki page
-    await currentWikiPage.update(content, `u/${BOT_NAME} added managed rule ${name}`);
-    ui.showToast(`Rule ${name} added!`);
+    try {
+        await currentWikiPage.update(content, `u/${BOT_NAME} added managed rule ${name}`);
+    } catch (e) {
+        console.error(e);
+        ui.showToast({
+            text: "Failed to add the AutoModerator rule. Please check the AutoModerator code and try again.",
+            appearance: "neutral",
+        });
+        let jobs = await scheduler.listJobs();
+        for (const job of jobs.filter(findJobForRule(name))) {
+            await scheduler.cancelJob(job.id);
+        }
+        return;
+    }
+    ui.showToast({text: `Rule ${name} added!`, appearance: "success"});
     console.log("Rule added!")
 }
 
