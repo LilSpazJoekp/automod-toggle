@@ -74,8 +74,8 @@ export async function onEventModActionHandler(
 
 export async function onFormSubmitRemoveRuleHandler(event: FormOnSubmitEvent, context: Context) {
     let currentVersion = new Current()
-    const {rules, ui} = event.values;
-    let {reddit, scheduler, subredditId} = context;
+    const {rules} = event.values;
+    let {reddit, scheduler, subredditId, ui} = context;
     let currentWikiPage = await fetchAutomodConfigPage(reddit, subredditId);
     let {content} = currentWikiPage
     content = _.trim(content, "-\n");
@@ -108,7 +108,25 @@ export async function onFormSubmitRemoveRuleHandler(event: FormOnSubmitEvent, co
         }
     }
     await currentWikiPage.update(content, `u/${BOT_NAME} removed managed rule(s) ${rules.join(", ")}`);
-    ui.showToast(`Rule(s) ${rules.join(", ")} removed!`);
+    ui.showToast({appearance: "success", text: `Rule(s) ${rules.join(", ")} removed!`});
+}
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
+async function rejectSubmit(error: string, ui: Context["ui"], values: FormOnSubmitEvent["values"]): Promise<void> {
+    async function toast() {
+        ui.showToast({
+            appearance: "neutral",
+            text: error + " Please try again.",
+        });
+    }
+
+    toast().then(
+        () => {
+            const {duration, name, rule, startCron} = values;
+            ui.showForm(addRuleForm, {existingValues: {duration, name, rule, startCron}});
+        },
+    );
 }
 
 export async function onFormSubmitAddRuleHandler(event: FormOnSubmitEvent, context: Context): Promise<void> {
@@ -120,19 +138,13 @@ export async function onFormSubmitAddRuleHandler(event: FormOnSubmitEvent, conte
     const durationSeconds = durationParser(duration, "s");
     if (durationSeconds == null) {
         console.log(`Duration is invalid: ${duration}`)
-        ui.showToast({
-            appearance: "neutral",
-            text: "Invalid duration",
-        });
+        await rejectSubmit("Invalid duration.", ui, event.values);
         return;
     }
     // Check if the cron expression is valid
     if (!validateCron(startCron)) {
         console.log(`Cron expression is invalid: ${startCron}`)
-        ui.showToast({
-            appearance: "neutral",
-            text: "Invalid cron expression",
-        });
+        await rejectSubmit("Invalid cron expression.", ui, event.values);
         return;
     }
     // Check if the duration is too long for the cron expression
@@ -149,21 +161,47 @@ export async function onFormSubmitAddRuleHandler(event: FormOnSubmitEvent, conte
     console.log(`prev + durationSeconds > next: ${previousDisableDate > nextCronDate}`)
     console.log(`shouldBeEnabled: ${shouldBeEnabled}`)
     if (previousDisableDate > nextCronDate) {
-        ui.showToast({
-            text: "Duration too long for provided cron schedule", appearance: "neutral",
-        });
+        await rejectSubmit("Duration too long for provided cron schedule.", ui, event.values);
         return;
     }
 
     // Check if the rule already exists
     if (await ruleExists(name, reddit, scheduler, subredditId)) {
-        ui.showToast({
-            text: `A rule named '${name}' already exists!`,
-            appearance: "neutral",
-        });
+        await rejectSubmit(`A rule named '${name}' already exists.`, ui, event.values);
         return;
     }
 
+    // Add the rule to the wiki page
+    let currentWikiPage = await fetchAutomodConfigPage(reddit, subredditId);
+    let content = currentWikiPage.content
+
+    content = _.trim(content, "-\n");
+    const {newRule, validationRule} = currentVersion.generateRuleString(
+        startCron,
+        durationSeconds,
+        name,
+        rule,
+        shouldBeEnabled,
+    );
+    content = `${content.trim()}\n---\n${newRule}`;
+    let validationContent = `${content.trim()}\n---\n${validationRule}`;
+    // Update the wiki page
+    try {
+        await currentWikiPage.update(validationContent, `u/${BOT_NAME} validating managed rule ${name}`);
+    } catch (e) {
+        console.error(e);
+        const regex = /"special_errors": \["(.*?):\\n\\n###### DO NOT EDIT THIS LINE/gm;
+        // @ts-ignore
+        let match = regex.exec(e.message);
+        let errorMessage = match ? " Error: " + match[1] : "";
+        await rejectSubmit(
+            `Failed to add the AutoModerator rule.${errorMessage} Please check the AutoModerator code and try again.`,
+            ui,
+            event.values,
+        );
+        return;
+    }
+    await currentWikiPage.update(content, `u/${BOT_NAME} added managed rule ${name}`);
     // Schedule a job to run at the given time
     await scheduler.runJob({
         name: JOB_NAME, data: {
@@ -186,30 +224,6 @@ export async function onFormSubmitAddRuleHandler(event: FormOnSubmitEvent, conte
             }, name: JOB_NAME,
             runAt: disableIn,
         });
-    }
-
-    // Add the rule to the wiki page
-    let currentWikiPage = await fetchAutomodConfigPage(reddit, subredditId);
-    let content = currentWikiPage.content
-
-    content = _.trim(content, "-\n");
-    const newRule = currentVersion.generateRuleString(startCron, durationSeconds, name, rule, shouldBeEnabled);
-    content = `${content.trim()}\n---\n${newRule.trim()}`;
-
-    // Update the wiki page
-    try {
-        await currentWikiPage.update(content, `u/${BOT_NAME} added managed rule ${name}`);
-    } catch (e) {
-        console.error(e);
-        ui.showToast({
-            text: "Failed to add the AutoModerator rule. Please check the AutoModerator code and try again.",
-            appearance: "neutral",
-        });
-        let jobs = await scheduler.listJobs();
-        for (const job of jobs.filter(findJobForRule(name))) {
-            await scheduler.cancelJob(job.id);
-        }
-        return;
     }
     ui.showToast({text: `Rule ${name} added!`, appearance: "success"});
     console.log("Rule added!")

@@ -4,16 +4,17 @@ import {OnTriggerEvent, ScheduledCronJob, ScheduledJob, TriggerContext, WikiPage
 import {BOT_NAME} from "./consts.js";
 import {extractData, fetchAutomodConfigPage, readVersion, setInstalledVersion} from "./utils.js";
 
-
 // The Current class is the current version.
 // To add a new version:
 // 1. Create a new class that extends the base class and override the methods.
 //    This new class will preserve the behavior of the previous version.
 // 2. Add a new check that references the new class in the migrateRules function.
 
-
 interface Version {
-    generateRuleString(cronSchedule: string, duration: number, name: string, rule: string, enabled: boolean): string;
+    generateRuleString(cronSchedule: string, duration: number, name: string, rule: string, enabled: boolean): {
+        newRule: string;
+        validationRule: string
+    };
 
     generateBorder(name: string, borderType: "start" | "end"): string;
 
@@ -36,9 +37,14 @@ export class Current implements Version {
         name: string,
         rule: string,
         enabled: boolean,
-    ): string {
+    ): { newRule: string; validationRule: string } {
         let parts: string[] = [this.generateBorder(name, "start"), this.generateInfoHeader(cronSchedule, duration)];
+        let validationParts: string[] = [
+            this.generateBorder(name, "start"),
+            this.generateInfoHeader(cronSchedule, duration),
+        ];
         rule = rule.trim()
+        validationParts.push(`${rule}`);
         if (!enabled) {
             let ruleParts: string[] = []
             for (const line of rule.split("\n")) {
@@ -49,7 +55,9 @@ export class Current implements Version {
         }
         parts.push(rule);
         parts.push(this.generateBorder(name, "end"));
-        return parts.join("\n").trim();
+        validationParts.push(this.generateBorder(name, "end"));
+        console.log(validationParts.join("\n").trim());
+        return {newRule: parts.join("\n").trim(), validationRule: validationParts.join("\n").trim()};
     }
 
     generateBorder(name: string, borderType: "start" | "end"): string {
@@ -110,7 +118,7 @@ export class Version001128 extends Current {
             "This rule will be automatically enabled at according to the following cron schedule here:",
             `https://crontab.guru/#${(
                 cronSchedule.replace(/ /g, "_")
-            )} (in the UTC timezone) and disabled ${duration} seconds later`,
+            )} (in the UTC timezone) and disabled ${duration} seconds later.`,
             "To delete this rule use the 'Delete AutoModerator Toggled Block' in the subreddit context menu!",
             "DO NOT EDIT THIS BLOCK WHILE IT IS COMMENTED OUT",
         );

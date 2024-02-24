@@ -7,8 +7,8 @@ import {
     onFormSubmitAddRuleHandler,
     onFormSubmitRemoveRuleHandler,
     onPressAddRuleHandler,
-    onPressRemoveRuleHandler, onPressShowRedisDataHandler,
-    // onPressShowRedisDataHandler,
+    onPressRemoveRuleHandler,
+    onPressShowRedisDataHandler,
 } from "./handlers.js";
 
 import {migrateRules} from "./migrations.js";

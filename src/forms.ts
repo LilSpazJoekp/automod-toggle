@@ -2,11 +2,14 @@ import {Data, Form} from "@devvit/public-api";
 import {sortBy} from "lodash";
 import {RedisKey} from "./types.js";
 
-export function addRuleFormGenerator(_: Data): Form {
+export function addRuleFormGenerator(data: Data): Form {
+    const {existingValues} = data
+    const {duration, name, rule, startCron} = existingValues || {duration: "", name: "", rule: "", startCron: ""}
     return {
         acceptLabel: "Add",
         fields: [
             {
+                defaultValue: name,
                 label: "Rule Name",
                 name: "name",
                 placeholder: "Rule Name",
@@ -14,7 +17,7 @@ export function addRuleFormGenerator(_: Data): Form {
                 type: "string",
             },
             {
-                defaultValue: "",
+                defaultValue: startCron,
                 label: "Cron schedule (UTC) to enable rule",
                 name: "startCron",
                 placeholder: "0 0 * * 3",
@@ -22,13 +25,15 @@ export function addRuleFormGenerator(_: Data): Form {
                 type: "string",
             },
             {
-                label: "Duration. Can be human readable or in seconds.",
+                defaultValue: duration,
+                label: "Duration. Can be human readable or in seconds. Examples (without quotes): '1 day', '2 hours', '30 minutes', or '3600'",
                 name: "duration",
                 placeholder: "1 day",
                 required: true,
                 type: "string",
             },
             {
+                defaultValue: rule,
                 label: "AutoModerator Rule(s)",
                 name: "rule",
                 required: true,
@@ -36,6 +41,7 @@ export function addRuleFormGenerator(_: Data): Form {
             },
         ],
         title: "Add AutoModerator Toggled Block",
+        description: "This will add a rule to the bottom of the AutoModerator config page that will be enabled at the specified time and disabled after the specified duration.",
     }
 }
 

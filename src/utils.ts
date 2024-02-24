@@ -134,6 +134,11 @@ export function readVersion(): string {
 }
 
 export function validateCron(cron: string): boolean {
+    try {
+        cronParser.parseExpression(cron);
+    } catch (e) {
+        return false;
+    }
     let parsedCron = cronParser.parseExpression(cron);
     return parsedCron.hasNext();
 }
