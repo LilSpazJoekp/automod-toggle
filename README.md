@@ -1,4 +1,4 @@
-# AutoMod Toggle
+# AutoModerator Toggle
 
 automod-toggle is an app that allows subreddit moderators to add AutoModerator rules that will be automatically toggled
 on and off based on a set schedule. This is useful for subreddits that want to have different rules enabled/disabled at

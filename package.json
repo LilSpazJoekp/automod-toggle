@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "automod-toggle",
-  "version": "1.1.0.0",
+  "version": "1.1.1.0",
   "license": "BSD-3-Clause",
   "type": "module",
   "scripts": {
@@ -19,7 +19,7 @@
     "@devvit/public-api": "0.10.12",
     "chrono-node": "2.3.9",
     "cron-parser": "^4.9.0",
-    "devvit": "^0.10.12",
+    "devvit": "^0.10.17",
     "lodash": "^4.17.21",
     "parse-duration": "^1.1.0"
   },
