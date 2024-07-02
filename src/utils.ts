@@ -51,14 +51,20 @@ export async function setInstalledVersion(context: TriggerContext): Promise<void
 export async function toggleRule(event: ScheduledJobEvent, context: Context): Promise<void> {
     let currentVersion = new Current()
     const {cronSchedule, duration, nextState, ruleName} = extractData(event);
+    console.log("Toggling rule", ruleName)
     let {reddit, scheduler, subredditId} = context;
     let currentWikiPage: WikiPage = await fetchAutomodConfigPage(reddit, subredditId);
+    console.log("currentWikiPage:", currentWikiPage.content)
     let start = currentVersion.generateBorder(ruleName, "start")
+    console.log("start:", start)
     let end = currentVersion.generateBorder(ruleName, "end")
+    console.log("end:", end)
     let header = currentVersion.generateInfoHeader(cronSchedule, duration);
+    console.log("header:", header)
     let parts: string[] = currentWikiPage.content.split(`${start}\n${header}`);
+    console.log("parts:", parts)
     if (parts.length < 2) {
-        console.log(`Failed to find rule ${ruleName}`);
+        console.error(`Failed to find rule ${ruleName}`);
         // let jobs = await scheduler.listJobs();
         // for (const job of jobs.filter(findJobForRule(ruleName))) {
         //     await scheduler.cancelJob(job.id);
@@ -66,9 +72,13 @@ export async function toggleRule(event: ScheduledJobEvent, context: Context): Pr
         return;
     }
     let wikiParts: string[] = [parts[0].trim(), start, header];
+    console.log("wikiParts:", wikiParts)
     let remaining: string = parts[1].trim();
+    console.log("remaining:", remaining)
     let remainingParts: string[] = remaining.split(end);
+    console.log("remainingParts:", remainingParts)
     let rule: string = remainingParts[0].trim();
+    console.log("rule:", rule)
     for (const line of rule.split("\n")) {
         if (nextState === "enabled") {
             if (line.startsWith("#")) {
@@ -80,10 +90,13 @@ export async function toggleRule(event: ScheduledJobEvent, context: Context): Pr
             wikiParts.push(`#${line}`);
         }
     }
-    wikiParts.push(end, remainingParts[1].trim());
+    wikiParts.push(end, remainingParts[1].trim())
+    console.log("wikiParts:", wikiParts)
     let newWikiPage = wikiParts.join("\n");
+    console.log("newWikiPage:", newWikiPage)
     await currentWikiPage.update(newWikiPage, `u/${BOT_NAME} ${nextState} managed rule ${ruleName}`);
     if (nextState === "enabled") {
+        console.log("Scheduling job to disable rule", ruleName, "in", duration, "seconds");
         await scheduler.runJob(
             {
                 data: {
@@ -97,6 +110,7 @@ export async function toggleRule(event: ScheduledJobEvent, context: Context): Pr
             },
         )
     }
+    console.log("Rule", ruleName, "toggled", nextState);
 }
 
 export function extractData(job: ScheduledJob | ScheduledCronJob | ScheduledJobEvent): ScheduledJobData {

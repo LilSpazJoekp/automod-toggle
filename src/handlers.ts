@@ -135,11 +135,15 @@ export async function onFormSubmitAddRuleHandler(event: FormOnSubmitEvent, conte
     const {reddit, scheduler, subredditId, ui} = context;
     console.log(`Adding a rule named '${name}' with cron ${startCron} and duration ${duration}`)
     // Check if the duration is valid
-    const durationSeconds = durationParser(duration, "s");
+    let durationSeconds = durationParser(duration, "s");
     if (durationSeconds == null) {
         console.log(`Duration is invalid: ${duration}`)
         await rejectSubmit("Invalid duration.", ui, event.values);
         return;
+    }
+    // if duration is only digits, it is in seconds, so we need to add "seconds" to it
+    if (duration.trim().match(/^[0-9]+$/)) {
+        durationSeconds *= 1000;
     }
     // Check if the cron expression is valid
     if (!validateCron(startCron)) {
