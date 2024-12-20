@@ -1,7 +1,7 @@
 {
   "private": true,
   "name": "automod-toggle",
-  "version": "1.1.2.0",
+  "version": "1.1.3.0",
   "license": "BSD-3-Clause",
   "type": "module",
   "scripts": {
@@ -9,22 +9,21 @@
     "bump-minor": "./bump_version.py minor && devvit upload --bump minor",
     "bump-patch": "./bump_version.py patch && devvit upload --bump patch",
     "bump-prerelease": "./bump_version.py pre && devvit upload --bump prerelease",
-    "publish-major": "npm run bump-major && devvit publish",
-    "publish-minor": "npm run bump-minor && devvit publish",
-    "publish-patch": "npm run bump-patch && devvit publish",
-    "publish-prerelease": "npm run bump-prerelease && devvit publish"
+    "publish-major": "npm run bump-major && devvit publish --public",
+    "publish-minor": "npm run bump-minor && devvit publish --public",
+    "publish-patch": "npm run bump-patch && devvit publish --public",
+    "publish-prerelease": "npm run bump-prerelease && devvit publish --public"
   },
   "dependencies": {
-    "@devvit/dev-server": "^0.10.13",
-    "@devvit/public-api": "0.10.12",
+    "@devvit/public-api": "0.11.5",
     "chrono-node": "2.3.9",
-    "cron-parser": "^4.9.0",
-    "devvit": "^0.10.17",
-    "lodash": "^4.17.21",
-    "parse-duration": "^1.1.0"
+    "cron-parser": "4.9.0",
+    "devvit": "0.11.5",
+    "lodash": "4.17.21",
+    "parse-duration": "1.1.0"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.202",
+    "@types/lodash": "^4.17.13",
     "typescript": "5.3.2"
   }
 }

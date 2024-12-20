@@ -167,3 +167,34 @@ at 12am CST (6am UTC). The `Non-Friday Rule` would be enabled every Saturday at 
   try to add a rule that is enabled every Monday at 12am with a duration of 2 weeks, the app will not allow you to add
   the rule.
 - If you try and add a rule with invalid config, the add rule form will reappear and display an error message.
+
+
+## Feedback
+
+If you have any feedback or suggestions for AutoModerator Toggle, file a bug report or feature request on the
+[GitHub page](https://github.com/LilSpazJoekp/automod-toggle).
+
+## Changes
+
+### 1.1.3
+
+- Update devvit version for vulnerability fix.
+
+### 1.1.2
+
+- Fix duration parsing when only a number is provided.
+- Added additional logging for debugging.
+
+### 1.1.1
+
+- Fix typo in README
+- Bump devvit version.
+
+### 1.1.0
+
+- Added rule validator.
+- Fixed various bugs.
+
+### 1.0.0
+
+- Initial release.

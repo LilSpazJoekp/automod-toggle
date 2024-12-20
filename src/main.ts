@@ -1,14 +1,12 @@
-import {AppInstall} from "@devvit/protos";
-import {Devvit, OnTriggerEvent, TriggerContext} from "@devvit/public-api";
+import {AppInstall, Devvit, TriggerContext, TriggerEventType} from "@devvit/public-api";
 import {DEBUGGING, JOB_NAME} from "./consts.js";
-import {addRuleFormGenerator, redisDataModalGenerator, removeRuleFormGenerator} from "./forms.js";
+import {addRuleFormGenerator, removeRuleFormGenerator} from "./forms.js";
 import {
     onEventModActionHandler,
     onFormSubmitAddRuleHandler,
     onFormSubmitRemoveRuleHandler,
     onPressAddRuleHandler,
     onPressRemoveRuleHandler,
-    onPressShowRedisDataHandler,
 } from "./handlers.js";
 
 import {migrateRules} from "./migrations.js";
@@ -22,16 +20,16 @@ Devvit.configure({
 
 Devvit.addTrigger({
     event: "AppInstall",
-    onEvent: async (_: OnTriggerEvent<AppInstall>, context: TriggerContext): Promise<void> => {
+    onEvent: async (_: TriggerEventType[AppInstall], context: TriggerContext): Promise<void> => {
         await setInstalledVersion(context);
     },
-})
+});
 
 
 Devvit.addTrigger({
     event: "AppUpgrade",
     onEvent: migrateRules,
-})
+});
 
 Devvit.addMenuItem({
     forUserType: "moderator",
@@ -47,14 +45,15 @@ Devvit.addMenuItem({
     onPress: onPressRemoveRuleHandler,
 });
 
-if (DEBUGGING) {
-    Devvit.addMenuItem({
-        forUserType: "moderator",
-        label: "See Redis Data",
-        location: "post",
-        onPress: onPressShowRedisDataHandler,
-    });
-}
+// if (DEBUGGING) {
+//     Devvit.addMenuItem({
+//         forUserType: "moderator",
+//         label: "See Redis Data",
+//         location: "post",
+//         onPress: onPressShowRedisDataHandler,
+//     });
+// }
+
 Devvit.addTrigger({
     event: "ModAction",
     onEvent: onEventModActionHandler,
@@ -70,11 +69,11 @@ export const removeRuleForm = Devvit.createForm(
     onFormSubmitRemoveRuleHandler,
 );
 
-export const showRedisDataModal = Devvit.createForm(
-    redisDataModalGenerator,
-    async () => {
-    },
-);
+// export const showRedisDataModal = Devvit.createForm(
+//     redisDataModalGenerator,
+//     async () => {
+//     },
+// );
 
 Devvit.addSchedulerJob(
     {

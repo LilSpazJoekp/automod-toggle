@@ -1,10 +1,10 @@
-import {Data, Form} from "@devvit/public-api";
+import {Form, JSONObject} from "@devvit/public-api";
 import {sortBy} from "lodash";
-import {RedisKey} from "./types.js";
 
-export function addRuleFormGenerator(data: Data): Form {
-    const {existingValues} = data
-    const {duration, name, rule, startCron} = existingValues || {duration: "", name: "", rule: "", startCron: ""}
+// import {RedisKey} from "./types.js";
+
+export function addRuleFormGenerator(data: JSONObject): Form {
+    const {duration, name, rule, startCron} = data.existingValues || {duration: "", name: "", rule: "", startCron: ""};
     return {
         acceptLabel: "Add",
         fields: [
@@ -42,10 +42,10 @@ export function addRuleFormGenerator(data: Data): Form {
         ],
         title: "Add AutoModerator Toggled Block",
         description: "This will add a rule to the bottom of the AutoModerator config page that will be enabled at the specified time and disabled after the specified duration.",
-    }
+    };
 }
 
-export function removeRuleFormGenerator(data: Data): Form {
+export function removeRuleFormGenerator(data: JSONObject): Form {
     return {
         acceptLabel: "Remove",
         fields: [
@@ -53,7 +53,7 @@ export function removeRuleFormGenerator(data: Data): Form {
                 label: "Rule Name",
                 multiSelect: true,
                 name: "rules",
-                options: sortBy(data.options, "label"),
+                options: sortBy(data.options as JSONObject[], "label"),
                 required: true,
                 type: "select",
             },
@@ -62,19 +62,19 @@ export function removeRuleFormGenerator(data: Data): Form {
     };
 }
 
-export function redisDataModalGenerator(data: Data): Form {
-    const {dataValues} = data
-    return {
-        fields: dataValues.map((redisKey: RedisKey) => {
-            return {
-                defaultValue: redisKey.value,
-                disabled: true,
-                label: redisKey.key,
-                name: redisKey.key,
-                required: false,
-                type: "paragraph",
-            }
-        }),
-        title: "Redis Data",
-    };
-}
+// export function redisDataModalGenerator(data: JSONObject): Form {
+//     const {dataValues} = data
+//     return {
+//         fields: dataValues.map((redisKey: RedisKey) => {
+//             return {
+//                 defaultValue: redisKey.value,
+//                 disabled: true,
+//                 label: redisKey.key,
+//                 name: redisKey.key,
+//                 required: false,
+//                 type: "paragraph",
+//             }
+//         }),
+//         title: "Redis Data",
+//     };
+// }
